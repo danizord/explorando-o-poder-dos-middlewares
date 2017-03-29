@@ -1,6 +1,7 @@
 # Explorando o Poder dos Middlewares
 
 https://danizord.github.io/explorando-o-poder-dos-middlewares
+https://joind.in/event/php-experience-2017/explorando-o-poder-dos-middlewares
 
 O conceito de middlewares HTTP vem se popularizando no ecossistema PHP desde a aprovação da PSR-7,
 sendo adotado pela maioria dos frameworks. Mas a comunidade ainda está em processo de adaptação.
