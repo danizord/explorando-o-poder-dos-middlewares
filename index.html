@@ -1,0 +1,582 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Explorando o Poder dos Middlewares</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/night.css">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Explorando o Poder dos <span class="highlight">Middlewares</span></h1>
+				</section>
+
+				<section>
+					<h2>Daniel Gimenes</h2>
+					<ul>
+						<li>7+ anos trabalhando com PHP</li>
+						<li>2+ anos usando middlewares</li>
+						<li>Engenheiro de Software na Maestrooo</li>
+						<li>Cursando Sistemas de Informação na UNISAL</li>
+						<li>Zend Framework <span class="red">❤</span></li>
+					</ul>
+					<p><a href="http://twitter.com/danizord">@Danizord</a></p>
+				</section>
+
+				<section>
+					<h2>Problemas</h2>
+				</section>
+
+				<section>
+					<ul>
+						<li>Tratamento de erros</li>
+						<li>Roteamento</li>
+						<li>Autenticação</li>
+						<li>Controle de acesso</li>
+						<li>Prevenção contra ataques</li>
+						<li>Validação de entrada</li>
+						<li>Tratamento de saída</li>
+						<li>Controle de sessão</li>
+						<li>Cache HTTP</li>
+						<li>Log de acessos</li>
+						<li>Negociação de conteúdo</li>
+						<li>...</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Reutilização de código!</h2>
+				</section>
+
+				<section>
+					<h2>Protocolo HTTP</h2>
+                    <ul class="fragment">
+                        <li>Requisição e resposta</li>
+                        <li class="fragment">Camada comum</li>
+                    </ul>
+				</section>
+
+				<section>
+					<h2>Reutilização de código <span class="highlight">na camada HTTP</span></h2>
+				</section>
+
+				<section>
+					<h2>HTTP Request no PHP</h2>
+					<ul>
+						<li>$_GET</li>
+						<li>$_POST</li>
+						<li>$_SERVER</li>
+						<li>$_FILES</li>
+						<li>$_COOKIES</li>
+						<li>fopen('php://input');</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>HTTP Response no PHP</h2>
+					<pre><code class="hljs php" data-trim>
+header('HTTP/1.1 404 Not Found');
+header('Content-type: text/html');
+
+echo 'Not found';
+					</code></pre>					
+				</section>
+
+				<section>
+					<h2>Problemas</h2>
+					<ul class="fragment">
+						<li>Estado global</li>
+						<li>Efeitos colaterais</li>
+						<li>Dificil de debugar</li>
+						<li>Dificil de testar</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Abstrações</h2>
+					<ul class="fragment">
+						<li>Aura\Http</li>
+						<li>Illuminate\Http</li>
+						<li>React\Http</li>
+						<li>Respect\Rest</li>
+						<li>Symfony\HttpFoundation</li>
+						<li>Zend\Http</li>
+						<li>...</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Reutilização de código <span class="highlight">na camada HTTP</span></h2>
+				</section>
+
+                <section data-background="white">
+                    <img src="image/lambda-middleware.png" class="plain">
+                </section>
+
+                <section>
+                    <h2>HttpKernelInterface</h2>
+					<pre><code class="hljs php" data-trim>
+namespace Symfony\Component\HttpKernel;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+interface HttpKernelInterface
+{
+    public function handle(Request $request): Response;
+}
+					</code></pre>                    
+                </section>
+
+				<section>
+					<h2>Filosofia <span class="highlight">Unix</span></h2>
+				</section>
+
+                <section data-theme="white">
+                    <h2>Middleware</h2>
+                    <img src="image/onion.png" class="fragment">
+                </section>
+
+                <section>
+                    <h2>Seus problemas <span class="highlight">acabaram!</span></h2>
+                    <img src="image/seu-creysson.jpg">
+                </section>
+
+                <section>
+                    <img src="image/stackphp.png" class="plain">
+                    <ol>
+                        <li>Implementar a HttpKernelInterface</li>
+                        <li>Receber o próximo pelo construtor</li>
+                        <li>Chamar o próximo</li>
+                    </ol>
+                    <p><a href="http://stackphp.com/">http://stackphp.com/</a></p>
+                </section>
+
+                <section>
+                    <h2>Interoperabilidade?</h2>
+                </section>
+
+                <section>
+                    <h2>PSR-7</h2>
+                    <ul class="fragment">
+                        <li>Psr\Http\Message\MessageInterface</li>
+                        <li>Psr\Http\Message\RequestInterface</li>
+                        <li><span class="highlight">Psr\Http\Message\ServerRequestInterface</span></li>
+                        <li><span class="highlight">Psr\Http\Message\ResponseInterface</span></li>
+                        <li>Psr\Http\Message\StreamInterface</li>
+                        <li>Psr\Http\Message\UriInterface</li>
+                        <li>Psr\Http\Message\UploadedFileInterface</li>
+                    </ul>
+                </section>
+
+				<section>
+					<h2>Assinaturas de middlewares</h2>
+					<pre class="fragment"><code class="hljs php" data-trim>
+function (ServerRequestInterface $request): ResponseInterface
+					</code></pre>
+
+					<pre class="fragment"><code class="hljs php" data-trim>
+function (
+    ServerRequestInterface $request,
+    ResponseInterface $response
+): ResponseInterface
+					</code></pre>
+
+					<pre class="fragment"><code class="hljs php" data-trim>
+function (
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    callable $next
+): ResponseInterface
+					</code></pre>
+				</section>
+
+                <section>
+                    <h2>PSR-15</h2>
+                </section>
+
+                <section>
+					<pre><code class="hljs php" data-trim>
+namespace Psr\Http\ServerMiddleware;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+interface MiddlewareInterface
+{
+    public function process(
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ): ResponseInterface;
+}
+					</code></pre>
+
+					<pre><code class="hljs php" data-trim>
+namespace Psr\Http\ServerMiddleware;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+interface DelegateInterface
+{
+    public function process(
+        ServerRequestInterface $request
+    ): ResponseInterface;
+}
+					</code></pre>                    
+                </section>
+
+                <section>
+                    <h2>Por que single-pass?</h2>
+					<pre><code class="hljs php" data-trim>
+$a = function ($request, $response, $next) {
+    $response = $response->withHeader('X-Foo', 'foo');
+
+    return $next(
+        $request->withAttribute('yay', 'woo'),
+        $response
+    );
+};
+$b = function ($request, $response, $next) {
+    $yay = $request->getAttribute('yay'); // woo
+
+    return new Response();
+}
+
+$a(new Request(), new Response(), $b); // fail :(
+					</code></pre>
+                        <a href="https://gist.github.com/asgrim/0d8b1cb7a4fa362db8fed06444d104ae">
+                            https://gist.github.com/asgrim/0d8b1cb7a4fa362db8fed06444d104ae
+                        </a>
+                </section>
+
+				<section>
+					<h1>Agora <span class="highlight">sim!</span></h1>
+				</section>
+
+                <section>
+                    <h2>Zend Expressive <span class="highlight">2</span></h2>
+                </section>
+
+                <section>
+                    <h2>Bootstrap</h2>
+					<pre><code class="hljs php" data-trim>
+require __DIR__ . '/../vendor/autoload.php';
+
+$container = require __DIR__ . '/../config/container.php';
+$app       = $container->get(Application::class);
+
+$app->pipe(ErrorHandler::class);
+$app->pipe(Session::class);
+$app->pipe(Authentication::class);
+$app->pipeRoutingMiddleware();
+$app->pipe(Authorization::class);
+$app->pipe(InputValidation::class);
+$app->pipeDispatchMiddleware();
+$app->pipe(NotFoundHandler::class);
+
+$app->run();
+					</code></pre>
+                </section>
+
+                <section>
+                    <h2>Imutabilidade</h2>
+					<pre class="fragment"><code class="hljs php" data-trim>
+// ...Bootstrap $app
+
+$before = serialize($app);
+
+$app->run();
+
+$after = serialize($app);
+
+$this->assertSame($before, $after);
+					</code></pre>
+                </section>
+
+                <section>
+                    <h2>Eliminando o overhead com <span class="highlight">FastCGI</span></h2>
+
+					<pre><code class="hljs php" data-trim>
+use PHPFastCGI\FastCGIDaemon\ApplicationFactory;
+use PHPFastCGI\Adapter\Expressive\ApplicationWrapper;
+
+// ...Bootstrap $app
+
+// Create the kernel for FastCGIDaemon (from Expressive app)
+$kernel = new ApplicationWrapper($app);
+
+// Create the symfony console application
+$daemon = (new ApplicationFactory)->createApplication($kernel);
+
+// Run the symfony console application
+$daemon->run();
+					</code></pre>
+                    <a href="https://github.com/PHPFastCGI/ExpressiveAdapter">https://github.com/PHPFastCGI/ExpressiveAdapter</a>             
+                </section>
+
+                <section>
+                    <h2>Tratamento de erros</h2>
+
+					<pre><code class="hljs php" data-trim>
+class ErrorHandler implements MiddlewareInterface
+{
+    public function process($request, $delegate)
+    {
+        try {
+            return $delegate->process($request);
+        } catch (Throwable $e) {
+            return $this->createErrorResponse($request, $e);
+        }
+    }
+}
+					</code></pre>
+
+                    <a href="https://zendframework.github.io/zend-expressive/features/error-handling/" class="fragment">
+                        https://zendframework.github.io/zend-expressive/features/error-handling/
+                    </a>
+                </section>
+
+                <section>
+                    <h2>Sessão</h2>
+
+					<pre><code class="hljs php" data-trim>
+class Session implements MiddlewareInterface
+{
+    public function process($request, $delegate)
+    {
+        $session = Session::fromRequest($request);
+        
+        $response = $delegate->process(
+            $request->withAttribute('session', $session)
+        );
+
+        return $session->writeToResponse($response);
+    }
+}
+					</code></pre>
+                    <a href="https://github.com/psr7-sessions/storageless" class="fragment">
+                        https://github.com/psr7-sessions/storageless
+                    </a>
+                </section>
+
+                <section>
+                    <h2>OAuth 2</h2>
+
+					<pre><code class="hljs php" data-trim>
+class OAuth implements MiddlewareInterface
+{
+    public function process($request, $delegate)
+    {
+        $user = $this->oAuthService->authenticate($request);
+        
+        return $delegate->process(
+            $request->withAttribute('user', $user)
+        );
+    }
+}
+					</code></pre>
+                    <a href="https://github.com/zf-fr/zfr-oauth2-server" class="fragment">
+                        https://github.com/zf-fr/zfr-oauth2-server
+                    </a>
+                </section>
+                
+                <section>
+                    <h2>Roteamento</h2>
+
+					<pre><code class="hljs php" data-trim>
+class Router implements MiddlewareInterface
+{
+    public function process($request, $delegate)
+    {
+        $matchedRoute = $this->router->match($request);
+        
+        return $delegate->process(
+            $request->withAttribute('route', $matchedRoute)
+        );
+    }
+}
+					</code></pre>
+                    <a href="https://zendframework.github.io/zend-expressive/features/router/intro/" class="fragment">
+                        https://zendframework.github.io/zend-expressive/features/router/intro/
+                    </a>
+                </section>
+
+                <section>
+                    <h2>Autorização</h2>
+
+					<pre><code class="hljs php" data-trim>
+class Authorization implements MiddlewareInterface
+{
+    public function process($request, $delegate)
+    {
+        $user         = $request->getAttribtue('user');
+        $route        = $request->getAttribtue('route');
+        $isAuthorized = $this->isAuthorized($user, $route);
+
+        if ($isAuthorized) {
+            return $delegate->process($request);
+        }
+
+        return $this->createUnauthorizedResponse($user, $route);
+    }
+}
+					</code></pre>
+                    <a href="https://github.com/ZF-Commons/zfc-rbac" class="fragment">
+                        https://github.com/ZF-Commons/zfc-rbac
+                    </a>
+                </section>
+
+                <section>
+                    <h2>Decodificação de JSON</h2>
+					<pre><code class="hljs php" data-trim>
+class JsonParser implements MiddlewareInterface
+{
+    public function process($request, $delegate)
+    {
+        $body = (string) $request->getBody();
+        $data = json_decode($body, true);
+
+        return $delegate->process(
+            $request->withParsedBody($data)
+        );
+    }
+}
+					</code></pre>
+                    <a href="https://zendframework.github.io/zend-expressive/features/helpers/body-parse/" class="fragment">
+                        https://zendframework.github.io/zend-expressive/features/helpers/body-parse/
+                    </a>                    
+                </section>
+
+                <section>
+                    <h2>Validação de entrada</h2>
+
+					<pre><code class="hljs php" data-trim>
+class JsonSchemaValidator implements MiddlewareInterface
+{
+    public function process($request, $delegate)
+    {
+        $validator = new JsonSchema\Validator();
+        $data      = $request->getParsedBody();
+
+        $validator->validate($data, '/my/schema.json');
+        
+        if ($validator->isValid()) {
+            return $delegate->process($request);
+        }
+        
+        return $this->createErrorResponse($validator);
+    }
+					</code></pre>
+                    <a href="https://github.com/oscarotero/psr7-middlewares#jsonschema" class="fragment">
+                        https://github.com/oscarotero/psr7-middlewares#jsonschema
+                    </a>                    
+                </section>
+
+                <section>
+                    <h2>Dispatch</h2>
+
+					<pre><code class="hljs php" data-trim>
+class DispatchMiddleware implements MiddlewareInterface
+{
+   public function process($request, $delegate)
+   {
+      $routeResult = $request->getAttribute(RouteResult::class);
+
+      if (null === $routeResult) {
+          return $delegate->process($request);
+      }
+
+      $middleware = $routeResult->getMatchedMiddleware();
+
+      return $middleware->process($request, $delegate);
+   }
+}
+					</code></pre>
+                    <a href="https://zendframework.github.io/zend-expressive/features/router/intro/" class="fragment">
+                        https://zendframework.github.io/zend-expressive/features/router/intro/
+                    </a>
+                </section>
+
+                <section>
+                    <h2>Aplicação</h2>
+                </section>
+
+                <section>
+                    <h2>Not Found</h2>
+					<pre><code class="hljs php" data-trim>
+class NotFoundHandler implements MiddlewareInterface
+{
+   public function process($request, $delegate)
+   {
+      return new Response(404);
+   }
+}
+					</code></pre>
+                    <a href="https://zendframework.github.io/zend-expressive/cookbook/custom-404-page-handling/" class="fragment">
+                        https://zendframework.github.io/zend-expressive/cookbook/custom-404-page-handling/
+                    </a>                    
+                </section>
+
+				<section>
+					<h2>Outros projetos interessantes</h2>
+					<ul>
+                        <li class="fragment">https://github.com/oscarotero/psr7-middlewares</li>
+						<li class="fragment">https://github.com/middlewares/awesome-psr15-middlewares</li>
+					</ul>
+				</section>
+
+				<section>
+					<h1>Perguntas?</h1>
+				</section>
+
+				<section>
+					<h3>Obrigado!</h2>
+					<p>
+                        Daniel Gimenes<br>
+                        Twitter: <a href="http://twitter.com/danizord">@Danizord</a><br>
+                        Github: <a href="http://github.com/danizord">@Danizord</a>
+                    </p>
+					<p>Feedback: <a href="https://joind.in/talk/1bca0 ">https://joind.in/talk/1bca0</a></p>
+                    <img src="image/joindin-qr-code.png">
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
